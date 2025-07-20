@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cloud 9 Portal</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: white;
+      overflow: hidden;
+      transition: background 1s ease;
+    }
+
+    #goBtn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 20px 50px;
+      font-size: 2.5rem;
+      background: linear-gradient(to right, #00c6ff, #0072ff);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 0 20px #00c6ff;
+      z-index: 5;
+    }
+
+    .cloud {
+      position: absolute;
+      width: 200px;
+      height: 120px;
+      opacity: 0;
+      transition: all 2s ease-in-out;
+      z-index: 2;
+    }
+
+    .cloud svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .top-left    { top: -150px; left: -250px; }
+    .top-right   { top: -150px; right: -250px; }
+    .bottom-left { bottom: -150px; left: -250px; }
+    .bottom-right{ bottom: -150px; right: -250px; }
+
+    .animate-clouds .top-left {
+      top: 35%;
+      left: 30%;
+      opacity: 1;
+    }
+
+    .animate-clouds .top-right {
+      top: 35%;
+      right: 30%;
+      opacity: 1;
+    }
+
+    .animate-clouds .bottom-left {
+      bottom: 35%;
+      left: 30%;
+      opacity: 1;
+    }
+
+    .animate-clouds .bottom-right {
+      bottom: 35%;
+      right: 30%;
+      opacity: 1;
+    }
+
+    #lightning {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: white;
+      opacity: 0;
+      z-index: 4;
+    }
+
+    @keyframes flash {
+      0% { opacity: 0; }
+      50% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    #bigCloud {
+      display: none;
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 350px;
+      height: 180px;
+      z-index: 5;
+    }
+
+    #bigCloud svg {
+      width: 100%;
+      height: 100%;
+      fill: white;
+    }
+
+    #welcome {
+      display: none;
+      position: absolute;
+      top: 52%;
+      width: 100%;
+      text-align: center;
+      z-index: 6;
+      color: white;
+    }
+
+    #welcome h1 {
+      font-size: 3.8rem;
+      background: linear-gradient(90deg, #ff00cc, #00ffcc, #00e0ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 20px white;
+    }
+
+    .buttons {
+      margin-top: 60px;
+    }
+
+    .action-btn {
+      margin: 15px;
+      padding: 14px 30px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 30px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 0 15px #ffffff50;
+      animation: float 3s infinite ease-in-out;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .action-btn:hover {
+      background: #00e0ff;
+      color: black;
+    }
+
+    @keyframes float {
+      0%   { transform: translateY(0); }
+      50%  { transform: translateY(-10px); }
+      100% { transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <button id="goBtn">GO!!</button>
+
+  <div id="cloudContainer">
+    <div class="cloud top-left">
+      <svg viewBox="0 0 64 64"><path d="M24,16A12,12,0,0,0,12,28H11A9,9,0,1,0,11,46H50a10,10,0,1,0,0-20h-.42A14,14,0,0,0,24,16Z"/></svg>
+    </div>
+    <div class="cloud top-right">
+      <svg viewBox="0 0 64 64"><path d="M24,16A12,12,0,0,0,12,28H11A9,9,0,1,0,11,46H50a10,10,0,1,0,0-20h-.42A14,14,0,0,0,24,16Z"/></svg>
+    </div>
+    <div class="cloud bottom-left">
+      <svg viewBox="0 0 64 64"><path d="M24,16A12,12,0,0,0,12,28H11A9,9,0,1,0,11,46H50a10,10,0,1,0,0-20h-.42A14,14,0,0,0,24,16Z"/></svg>
+    </div>
+    <div class="cloud bottom-right">
+      <svg viewBox="0 0 64 64"><path d="M24,16A12,12,0,0,0,12,28H11A9,9,0,1,0,11,46H50a10,10,0,1,0,0-20h-.42A14,14,0,0,0,24,16Z"/></svg>
+    </div>
+  </div>
+
+  <div id="lightning"></div>
+
+  <div id="bigCloud">
+    <svg viewBox="0 0 64 64">
+      <path d="M24,16A12,12,0,0,0,12,28H11A9,9,0,1,0,11,46H50a10,10,0,1,0,0-20h-.42A14,14,0,0,0,24,16Z"/>
+    </svg>
+  </div>
+
+  <div id="welcome">
+    <h1>Welcome to Cloud 9</h1>
+    <div class="buttons">
+      <button class="action-btn">Explore</button>
+      <button class="action-btn">Join</button>
+      <button class="action-btn">Learn More</button>
+    </div>
+  </div>
+
+  <script>
+    const goBtn = document.getElementById('goBtn');
+    const cloudContainer = document.getElementById('cloudContainer');
+    const lightning = document.getElementById('lightning');
+    const bigCloud = document.getElementById('bigCloud');
+    const welcome = document.getElementById('welcome');
+
+    goBtn.addEventListener('click', () => {
+      goBtn.style.display = 'none';
+      cloudContainer.classList.add('animate-clouds');
+
+      setTimeout(() => {
+        lightning.style.animation = 'flash 0.5s ease-in-out';
+        lightning.style.opacity = '1';
+      }, 2000);
+
+      setTimeout(() => {
+        document.body.style.background = 'black';
+        lightning.style.opacity = '0';
+        bigCloud.style.display = 'block';
+        welcome.style.display = 'block';
+      }, 2500);
+    });
+  </script>
+</body>
+</html>
