@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud 9 Experience</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --violet: #8A2BE2;
+            --blue: #4169E1;
+            --pink: #FF6B9E;
+            --orange: #FF8C42;
+            --yellow: #FFD166;
+            --teal: #06D6A0;
+            --sky: #7EC8E3;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #FFFAFA 0%, #E8F4F8 100%);
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .subtle-cloud-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500" viewBox="0 0 500 500" opacity="0.05"><path fill="%238A2BE2" d="M450,200c0,50-25,75-75,75c25,50,0,100-50,100s-75-50-125-50s-100,25-100,75s50,75,100,75s125-25,125-75c0-25,25-50,50-50S450,250,450,200z"/></svg>');
+            animation: cloudMove 120s linear infinite;
+            z-index: 1;
+        }
+        
+        @keyframes cloudMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 500px 500px; }
+        }
+        
+        #main-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 18px 50px;
+            font-size: 1.8rem;
+            font-weight: 900;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(45deg, var(--violet) 0%, var(--blue) 100%);
+            color: white;
+            box-shadow: 0 10px 40px rgba(138, 43, 226, 0.4);
+            transition: all 0.3s ease;
+            z-index: 100;
+            cursor: pointer;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        
+        #main-button:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 0 15px 50px rgba(138, 43, 226, 0.6);
+            background: linear-gradient(45deg, var(--blue) 0%, var(--violet) 100%);
+        }
+        
+        .flash-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.2) 100%);
+            opacity: 0;
+            z-index: 90;
+            pointer-events: none;
+        }
+        
+        .firework {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            box-shadow: 0 0 25px 12px;
+            opacity: 0;
+            z-index: 80;
+            pointer-events: none;
+            filter: brightness(1.2);
+        }
+        
+        .cloud {
+            position: absolute;
+            width: 200px;
+            height: 140px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 50%;
+            filter: drop-shadow(0 15px 25px rgba(0,0,0,0.1));
+            opacity: 0;
+            z-index: 50;
+            pointer-events: none;
+        }
+        
+        .cloud:before, .cloud:after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        .cloud:before {
+            width: 80px;
+            height: 80px;
+            top: -30px;
+            left: 30px;
+        }
+        
+        .cloud:after {
+            width: 60px;
+            height: 60px;
+            top: -25px;
+            right: 30px;
+        }
+        
+        #merged-cloud {
+            position: absolute;
+            width: 400px;
+            height: 280px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 50%;
+            filter: drop-shadow(0 25px 35px rgba(0,0,0,0.15));
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 0;
+            z-index: 50;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        #merged-cloud:before, #merged-cloud:after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        #merged-cloud:before {
+            width: 160px;
+            height: 160px;
+            top: -60px;
+            left: 60px;
+        }
+        
+        #merged-cloud:after {
+            width: 120px;
+            height: 120px;
+            top: -50px;
+            right: 60px;
+        }
+        
+        #welcome-message {
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: #333;
+            text-align: center;
+            opacity: 0;
+            z-index: 60;
+            pointer-events: none;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background: linear-gradient(45deg, var(--violet), var(--pink), var(--orange));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+            width: 80%;
+            line-height: 1.2;
+            position: relative;
+        }
+        
+        .glow {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from {
+                filter: drop-shadow(0 0 10px rgba(138, 43, 226, 0.3));
+            }
+            to {
+                filter: drop-shadow(0 0 25px rgba(255, 107, 158, 0.5));
+            }
+        }
+        
+        #icon-container {
+            position: absolute;
+            bottom: 15%;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            opacity: 0;
+            z-index: 60;
+        }
+        
+        .motivational-icon {
+            width: 120px;
+            height: 150px;
+            background: white;
+            border-radius: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            transition: all 0.5s ease;
+            cursor: pointer;
+            position: relative;
+            padding: 15px;
+            text-align: center;
+            will-change: transform;
+        }
+        
+        .motivational-icon .icon-label {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-top: 12px;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .motivational-icon:nth-child(1) { background: linear-gradient(135deg, var(--violet), #BA68C8); color: white; }
+        .motivational-icon:nth-child(2) { background: linear-gradient(135deg, var(--blue), var(--sky)); color: white; }
+        .motivational-icon:nth-child(3) { background: linear-gradient(135deg, var(--teal), #4CC9F0); color: white; }
+        .motivational-icon:nth-child(4) { background: linear-gradient(135deg, var(--orange), var(--yellow)); color: white; }
+        .motivational-icon:nth-child(5) { background: linear-gradient(135deg, var(--pink), #FF9A8B); color: white; }
+        
+        .motivational-icon:hover {
+            transform: translateY(-20px) scale(1.15) rotate(5deg);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            z-index: 70;
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-25px) rotate(3deg); }
+            50% { transform: translateY(-15px) rotate(-3deg); }
+            75% { transform: translateY(-30px) rotate(5deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        
+        .pulse-animation {
+            animation: pulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 15px 35px rgba(0,0,0,0.15); }
+            50% { transform: scale(1.08); box-shadow: 0 20px 45px rgba(0,0,0,0.25); }
+            100% { transform: scale(1); box-shadow: 0 15px 35px rgba(0,0,0,0.15); }
+        }
+        
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.3s; }
+        .delay-3 { animation-delay: 0.5s; }
+        .delay-4 { animation-delay: 0.7s; }
+        .delay-5 { animation-delay: 0.9s; }
+        
+        .confetti {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            opacity: 0;
+            z-index: 40;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="subtle-cloud-bg"></div>
+    <button id="main-button" class="animate__animated">GO!!</button>
+    <div class="flash-effect"></div>
+    <div class="cloud" id="cloud1"></div>
+    <div class="cloud" id="cloud2"></div>
+    <div class="cloud" id="cloud3"></div>
+    <div class="cloud" id="cloud4"></div>
+    <div id="merged-cloud">
+        <h1 id="welcome-message" class="glow">Welcome to Cloud 9</h1>
+    </div>
+    <div id="icon-container">
+        <div class="motivational-icon float-animation delay-1 pulse-animation">
+            <div>🚀</div>
+            <div class="icon-label">Launch</div>
+        </div>
+        <div class="motivational-icon float-animation delay-2 pulse-animation">
+            <div>⚡</div>
+            <div class="icon-label">Energy</div>
+        </div>
+        <div class="motivational-icon float-animation delay-3 pulse-animation">
+            <div>📚</div>
+            <div class="icon-label">Learn</div>
+        </div>
+        <div class="motivational-icon float-animation delay-4 pulse-animation">
+            <div>🧠</div>
+            <div class="icon-label">Grow</div>
+        </div>
+        <div class="motivational-icon float-animation delay-5 pulse-animation">
+            <div>💡</div>
+            <div class="icon-label">Ideas</div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mainButton = document.getElementById('main-button');
+            
+            if (mainButton) {
+                mainButton.addEventListener('click', function() {
+                    // Step 1: Button click animation
+                    this.classList.add('animate__fadeOut');
+                    
+                    // Step 2: Multiple flash effects with color shifts
+                    const flash = document.querySelector('.flash-effect');
+                    
+                    // Big initial flash with color transition
+                    flash.style.background = 'radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(138,43,226,0.3) 100%)';
+                    flash.style.opacity = '1';
+                    flash.style.transition = 'opacity 0.3s ease-out, background 0.6s ease';
+                    
+                    setTimeout(() => {
+                        flash.style.opacity = '0';
+                        
+                        // Secondary flashes with different colors
+                        setTimeout(() => {
+                            flash.style.background = 'radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(65,105,225,0.3) 100%)';
+                            flash.style.opacity = '0.8';
+                            flash.style.transition = 'opacity 0.2s ease-out';
+                            
+                            setTimeout(() => {
+                                flash.style.opacity = '0';
+                                
+                                setTimeout(() => {
+                                    flash.style.background = 'radial-gradient(circle, rgba(255,255,255,0.85) 0%, rgba(255,107,158,0.3) 100%)';
+                                    flash.style.opacity = '0.6';
+                                    flash.style.transition = 'opacity 0.15s ease-out';
+                                    
+                                    setTimeout(() => {
+                                        flash.style.opacity = '0';
+                                    }, 150);
+                                }, 200);
+                            }, 200);
+                        }, 300);
+                    }, 300);
+                    
+                    // Step 3: Create vibrant fireworks
+                    createFireworks();
+                    
+                    // Step 4: Create confetti explosion
+                    createConfetti();
+                    
+                    // Step 5: Animate clouds coming in
+                    setTimeout(() => {
+                        animateClouds();
+                    }, 600);
+                    
+                    // Step 6: Merge clouds and show message
+                    setTimeout(() => {
+                        mergeClouds();
+                        showWelcomeMessage();
+                        showIcons();
+                    }, 3000);
+                });
+            }
+            
+            function createFireworks() {
+                const colors = ['#8A2BE2', '#4169E1', '#FF6B9E', '#FF8C42', '#FFD166', '#06D6A0', '#7EC8E3', '#FF00FF', '#00FFFF'];
+                
+                for (let i = 0; i < 60; i++) {
+                    setTimeout(() => {
+                        const firework = document.createElement('div');
+                        firework.className = 'firework';
+                        firework.style.left = Math.random() * 100 + '%';
+                        firework.style.top = Math.random() * 100 + '%';
+                        firework.style.color = colors[Math.floor(Math.random() * colors.length)];
+                        document.body.appendChild(firework);
+                        
+                        // Animate firework
+                        setTimeout(() => {
+                            firework.style.opacity = '1';
+                            firework.style.transform = 'scale(1)';
+                            firework.style.transition = 'all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                            
+                            setTimeout(() => {
+                                firework.style.opacity = '0';
+                                firework.style.transform = 'scale(5)';
+                                
+                                setTimeout(() => {
+                                    firework.remove();
+                                }, 800);
+                            }, 800);
+                        }, 10);
+                    }, i * 100);
+                }
+            }
+            
+            function createConfetti() {
+                const colors = ['#8A2BE2', '#4169E1', '#FF6B9E', '#FF8C42', '#FFD166', '#06D6A0', '#7EC8E3'];
+                const shapes = ['circle', 'square', 'triangle'];
+                
+                for (let i = 0; i < 150; i++) {
+                    setTimeout(() => {
+                        const confetti = document.createElement('div');
+                        confetti.className = 'confetti';
+                        confetti.style.left = Math.random() * 100 + '%';
+                        confetti.style.top = Math.random() * 100 + '%';
+                        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                        
+                        // Random shape
+                        const shape = shapes[Math.floor(Math.random() * shapes.length)];
+                        if (shape === 'circle') {
+                            confetti.style.borderRadius = '50%';
+                        } else if (shape === 'triangle') {
+                            confetti.style.width = '0';
+                            confetti.style.height = '0';
+                            confetti.style.borderLeft = '8px solid transparent';
+                            confetti.style.borderRight = '8px solid transparent';
+                            confetti.style.borderBottom = `15px solid ${colors[Math.floor(Math.random() * colors.length)]}`;
+                            confetti.style.backgroundColor = 'transparent';
+                        }
+                        
+                        confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                        confetti.style.opacity = '1';
+                        document.body.appendChild(confetti);
+                        
+                        // Animate confetti falling
+                        const animationDuration = 3 + Math.random() * 4;
+                        confetti.style.transition = `all ${animationDuration}s cubic-bezier(0.1, 0.8, 0.3, 1)`;
+                        
+                        setTimeout(() => {
+                            confetti.style.top = '120%';
+                            confetti.style.transform = `rotate(${Math.random() * 720}deg)`;
+                            confetti.style.opacity = '0.5';
+                            
+                            setTimeout(() => {
+                                confetti.remove();
+                            }, animationDuration * 1000);
+                        }, 10);
+                    }, i * 30);
+                }
+            }
+        
+            function animateClouds() {
+                const clouds = [
+                    { id: 'cloud1', startX: '-30%', startY: '-30%', endX: '25%', endY: '25%' },
+                    { id: 'cloud2', startX: '130%', startY: '-30%', endX: '75%', endY: '25%' },
+                    { id: 'cloud3', startX: '-30%', startY: '130%', endX: '25%', endY: '75%' },
+                    { id: 'cloud4', startX: '130%', startY: '130%', endX: '75%', endY: '75%' }
+                ];
+                
+                clouds.forEach(cloud => {
+                    const element = document.getElementById(cloud.id);
+                    if (element) {
+                        element.style.left = cloud.startX;
+                        element.style.top = cloud.startY;
+                        element.style.opacity = '1';
+                        element.style.transition = 'all 2s cubic-bezier(0.17, 0.67, 0.21, 0.99)';
+                        
+                        setTimeout(() => {
+                            element.style.left = cloud.endX;
+                            element.style.top = cloud.endY;
+                        }, 100);
+                    }
+                });
+            }
+            
+            function mergeClouds() {
+                const clouds = ['cloud1', 'cloud2', 'cloud3', 'cloud4'];
+                
+                // Hide individual clouds
+                clouds.forEach(id => {
+                    const cloud = document.getElementById(id);
+                    if (cloud) {
+                        cloud.style.opacity = '0';
+                        cloud.style.transition = 'opacity 0.8s ease-out';
+                    }
+                });
+                
+                // Show merged cloud
+                const mergedCloud = document.getElementById('merged-cloud');
+                if (mergedCloud) {
+                    mergedCloud.style.opacity = '1';
+                    mergedCloud.style.transform = 'translate(-50%, -50%) scale(1)';
+                    mergedCloud.style.transition = 'all 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                    
+                    // Pulse animation
+                    setTimeout(() => {
+                        mergedCloud.style.transform = 'translate(-50%, -50%) scale(1.2)';
+                        
+                        setTimeout(() => {
+                            mergedCloud.style.transform = 'translate(-50%, -50%) scale(1)';
+                        }, 500);
+                    }, 1500);
+                }
+            }
+            
+            function showWelcomeMessage() {
+                setTimeout(() => {
+                    const message = document.getElementById('welcome-message');
+                    if (message) {
+                        message.style.opacity = '1';
+                        message.style.transition = 'opacity 1.2s ease-out';
+                        
+                        // Color shift animation
+                        setInterval(() => {
+                            const colors = [
+                                'linear-gradient(45deg, #8A2BE2, #FF6B9E, #FF8C42)',
+                                'linear-gradient(45deg, #4169E1, #7EC8E3, #06D6A0)',
+                                'linear-gradient(45deg, #FF6B9E, #FFD166, #8A2BE2)',
+                                'linear-gradient(45deg, #06D6A0, #4169E1, #FF8C42)'
+                            ];
+                            message.style.backgroundImage = colors[Math.floor(Math.random() * colors.length)];
+                        }, 3000);
+                    }
+                }, 1500);
+            }
+            
+            function showIcons() {
+                setTimeout(() => {
+                    const icons = document.getElementById('icon-container');
+                    if (icons) {
+                        icons.style.opacity = '1';
+                        icons.style.transition = 'opacity 1.2s ease-out';
+                    }
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>
