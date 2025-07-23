@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realistic Volcano Eruption</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(to bottom, #000000 0%, #1a1a2e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        .icon-container {
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            z-index: 10;
+        }
+        
+        .icon-container:hover {
+            transform: scale(1.1);
+        }
+        
+        .volcano-icon {
+            color: #ff3333;
+            font-size: 6rem;
+            text-shadow: 0 0 20px rgba(255, 50, 50, 0.8);
+            animation: pulse 1.5s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            from { transform: scale(1); text-shadow: 0 0 20px rgba(255, 50, 50, 0.8); }
+            to { transform: scale(1.1); text-shadow: 0 0 30px rgba(255, 0, 0, 1); }
+        }
+        
+        .scene-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 1000;
+            perspective: 1000px;
+            overflow: hidden;
+        }
+        
+        .ground {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 30%;
+            background: linear-gradient(to top, #2a1805, #5a3921);
+            z-index: 1;
+        }
+        
+        .volcano {
+            position: absolute;
+            bottom: 30%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 500px;
+            height: 350px;
+            z-index: 2;
+        }
+        
+        .mountain {
+            position: absolute;
+            bottom: 0;
+            width: 0;
+            height: 0;
+            border-left: 250px solid transparent;
+            border-right: 250px solid transparent;
+            border-bottom: 350px solid #4a2e12;
+            filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+        }
+        
+        .crater {
+            position: absolute;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 80px;
+            background: #6b3e1a;
+            border-radius: 50% 50% 0 0;
+            z-index: 3;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.5);
+        }
+        
+        .lava-source {
+            position: absolute;
+            top: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 60px;
+            background: radial-gradient(ellipse at center, #ff4500 0%, #ff0000 70%);
+            border-radius: 50% 50% 0 0;
+            z-index: 4;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .lava-flow {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0;
+            background: linear-gradient(to bottom, #ff8c00, #ff4500);
+            transition: height 2s;
+            z-index: 3;
+        }
+        
+        .lava-particle {
+            position: absolute;
+            background: radial-gradient(circle, #ff4500 0%, #ff8c00 70%);
+            border-radius: 50%;
+            z-index: 5;
+            opacity: 0;
+            animation: lava-fall linear forwards;
+        }
+        
+        .lava-splash {
+            position: absolute;
+            background: radial-gradient(circle, #ff4500 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 4;
+            opacity: 0;
+            animation: lava-splash linear forwards;
+        }
+        
+        .volcanic-bomb {
+            position: absolute;
+            background: radial-gradient(circle, #ff4500 0%, #8b4513 70%);
+            border-radius: 50%;
+            z-index: 6;
+            opacity: 0;
+            animation: bomb-fall linear forwards;
+        }
+        
+        .smoke {
+            position: absolute;
+            background: radial-gradient(circle, rgba(50,50,50,0.8) 0%, rgba(20,20,20,0.1) 70%);
+            border-radius: 50%;
+            z-index: 7;
+            opacity: 0;
+            animation: smoke-rise linear forwards;
+        }
+        
+        .ash {
+            position: absolute;
+            background: radial-gradient(circle, rgba(100,100,100,0.6) 0%, rgba(50,50,50,0.1) 70%);
+            border-radius: 50%;
+            z-index: 8;
+            opacity: 0;
+            animation: ash-fall linear forwards;
+        }
+        
+        .flash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 200, 150, 0);
+            z-index: 100;
+            pointer-events: none;
+        }
+        
+        .options {
+            position: fixed;
+            bottom: 50px;
+            left: 0;
+            width: 100%;
+            display: none;
+            justify-content: center;
+            gap: 20px;
+            z-index: 1001;
+        }
+        
+        /* Animations */
+        @keyframes lava-fall {
+            0% { transform: translate(var(--startX), var(--startY)) scale(0.5); opacity: 1; }
+            100% { transform: translate(var(--endX), var(--endY)) scale(1); opacity: 0; }
+        }
+        
+        @keyframes lava-splash {
+            0% { transform: scale(0.1); opacity: 1; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+        
+        @keyframes bomb-fall {
+            0% { transform: translate(var(--startX), var(--startY)) rotate(0deg); opacity: 1; }
+            100% { transform: translate(var(--endX), var(--endY)) rotate(360deg); opacity: 0; }
+        }
+        
+        @keyframes smoke-rise {
+            0% { transform: translate(var(--startX), var(--startY)) scale(0.5); opacity: 0.8; }
+            100% { transform: translate(var(--endX), var(--endY)) scale(3); opacity: 0; }
+        }
+        
+        @keyframes ash-fall {
+            0% { transform: translate(var(--startX), var(--startY)) scale(0.5); opacity: 0.8; }
+            100% { transform: translate(var(--endX), var(--endY)) scale(1); opacity: 0; }
+        }
+        
+        @keyframes camera-shake {
+            0%, 100% { transform: translate(0, 0); }
+            10%, 30%, 50%, 70%, 90% { transform: translate(-10px, 5px); }
+            20%, 40%, 60%, 80% { transform: translate(10px, -5px); }
+        }
+        
+        .shake {
+            animation: camera-shake 1s linear infinite;
+        }
+        
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px 5px rgba(255, 100, 0, 0.5); }
+            50% { box-shadow: 0 0 40px 15px rgba(255, 50, 0, 0.8); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container text-center">
+        <div class="icon-container">
+            <i class="fas fa-volcano volcano-icon"></i>
+            <p class="text-white mt-3 fs-5">Click to witness a catastrophic volcanic eruption!</p>
+        </div>
+    </div>
+    
+    <div class="scene-container">
+        <div class="ground"></div>
+        <div class="volcano">
+            <div class="mountain"></div>
+            <div class="crater"></div>
+            <div class="lava-source"></div>
+        </div>
+    </div>
+    
+    <div class="flash"></div>
+    
+    <div class="options">
+        <button id="replay-btn" class="btn btn-danger px-4 py-3 fs-5 fw-bold">ERUPT AGAIN</button>
+        <button id="exit-btn" class="btn btn-secondary px-4 py-3 fs-5 fw-bold">EXIT</button>
+    </div>
+    
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const iconContainer = document.querySelector('.icon-container');
+            const sceneContainer = document.querySelector('.scene-container');
+            const lavaSource = document.querySelector('.lava-source');
+            const flash = document.querySelector('.flash');
+            const options = document.querySelector('.options');
+            
+            iconContainer.addEventListener('click', function() {
+                // Hide the icon
+                iconContainer.style.display = 'none';
+                
+                // Show the scene
+                sceneContainer.style.display = 'flex';
+                
+                // Camera flash effect
+                flash.style.background = 'rgba(255, 200, 150, 0.7)';
+                setTimeout(() => {
+                    flash.style.transition = 'background 1s';
+                    flash.style.background = 'rgba(255, 200, 150, 0)';
+                }, 100);
+                
+                // Shake the scene
+                sceneContainer.classList.add('shake');
+                
+                // Start the eruption
+                setTimeout(() => {
+                    lavaSource.style.display = 'block';
+                    lavaSource.style.boxShadow = '0 0 20px 5px rgba(255, 100, 0, 0.5)';
+                    lavaSource.style.animation = 'glow 0.5s infinite alternate';
+                    
+                    // Create eruption effects
+                    createEruption();
+                    
+                    // Show options after 7 seconds
+                    setTimeout(() => {
+                        options.style.display = 'flex';
+                        sceneContainer.classList.remove('shake');
+                    }, 7000);
+                }, 500);
+            });
+            
+            function createEruption() {
+                // Create lava flows
+                createLavaFlow();
+                
+                // Create raining lava particles
+                const lavaInterval = setInterval(() => {
+                    createLavaParticles();
+                }, 50);
+                
+                // Create volcanic bombs
+                const bombInterval = setInterval(() => {
+                    createVolcanicBombs();
+                }, 200);
+                
+                // Create smoke and ash
+                const smokeInterval = setInterval(() => {
+                    createSmokeAndAsh();
+                }, 150);
+                
+                // Stop creating effects after 6 seconds
+                setTimeout(() => {
+                    clearInterval(lavaInterval);
+                    clearInterval(bombInterval);
+                    clearInterval(smokeInterval);
+                    lavaSource.style.animation = 'none';
+                    lavaSource.style.boxShadow = 'none';
+                }, 6000);
+            }
+            
+            function createLavaFlow() {
+                // Create multiple lava flows down the mountain
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        const flow = document.createElement('div');
+                        flow.classList.add('lava-flow');
+                        
+                        // Random width and position
+                        const width = Math.random() * 100 + 50;
+                        const left = Math.random() * 300 - 150;
+                        
+                        flow.style.width = `${width}px`;
+                        flow.style.left = `calc(50% + ${left}px)`;
+                        flow.style.borderRadius = '0 0 10px 10px';
+                        
+                        // Add glowing effect
+                        flow.style.boxShadow = '0 0 20px 5px rgba(255, 100, 0, 0.5)';
+                        
+                        // Add to volcano
+                        document.querySelector('.volcano').appendChild(flow);
+                        
+                        // Animate flow
+                        setTimeout(() => {
+                            flow.style.height = `${Math.random() * 200 + 100}px`;
+                            
+                            // Create splashes
+                            const splashInterval = setInterval(() => {
+                                createLavaSplash(flow);
+                            }, 300);
+                            
+                            // Remove after animation
+                            setTimeout(() => {
+                                clearInterval(splashInterval);
+                                flow.style.opacity = '0';
+                                flow.style.transition = 'opacity 1s';
+                                setTimeout(() => {
+                                    flow.remove();
+                                }, 1000);
+                            }, 5000);
+                        }, 100);
+                    }, i * 300);
+                }
+            }
+            
+            function createLavaParticles() {
+                // Create multiple lava particles raining down
+                for (let i = 0; i < 5; i++) {
+                    const particle = document.createElement('div');
+                    particle.classList.add('lava-particle');
+                    
+                    // Random size
+                    const size = Math.random() * 10 + 5;
+                    
+                    // Random start position (around crater)
+                    const startX = Math.random() * 200 - 100;
+                    const startY = -Math.random() * 50;
+                    
+                    // Random end position (falling down)
+                    const endX = startX + (Math.random() * 100 - 50);
+                    const endY = Math.random() * 300 + 100;
+                    
+                    particle.style.width = `${size}px`;
+                    particle.style.height = `${size}px`;
+                    particle.style.left = '50%';
+                    particle.style.bottom = '30%';
+                    particle.style.setProperty('--startX', `${startX}px`);
+                    particle.style.setProperty('--startY', `${startY}px`);
+                    particle.style.setProperty('--endX', `${endX}px`);
+                    particle.style.setProperty('--endY', `${endY}px`);
+                    particle.style.animationDuration = `${Math.random() * 1 + 0.5}s`;
+                    
+                    sceneContainer.appendChild(particle);
+                    
+                    // Remove after animation
+                    setTimeout(() => {
+                        particle.remove();
+                    }, 2000);
+                }
+            }
+            
+            function createLavaSplash(flow) {
+                const splash = document.createElement('div');
+                splash.classList.add('lava-splash');
+                
+                // Position at bottom of lava flow
+                const flowRect = flow.getBoundingClientRect();
+                const containerRect = sceneContainer.getBoundingClientRect();
+                
+                const x = flowRect.left + flowRect.width/2 - containerRect.left;
+                const y = containerRect.bottom - flowRect.bottom;
+                
+                splash.style.width = '30px';
+                splash.style.height = '30px';
+                splash.style.left = `${x}px`;
+                splash.style.bottom = `${y}px`;
+                splash.style.animationDuration = '0.5s';
+                
+                sceneContainer.appendChild(splash);
+                
+                // Remove after animation
+                setTimeout(() => {
+                    splash.remove();
+                }, 500);
+            }
+            
+            function createVolcanicBombs() {
+                // Create large chunks of molten rock
+                for (let i = 0; i < 3; i++) {
+                    const bomb = document.createElement('div');
+                    bomb.classList.add('volcanic-bomb');
+                    
+                    // Random size
+                    const size = Math.random() * 30 + 20;
+                    
+                    // Random start position (from crater)
+                    const startX = Math.random() * 100 - 50;
+                    const startY = -Math.random() * 50;
+                    
+                    // Random end position (exploded outward)
+                    const endX = startX + (Math.random() * 400 - 200);
+                    const endY = Math.random() * 200 + 100;
+                    
+                    bomb.style.width = `${size}px`;
+                    bomb.style.height = `${size}px`;
+                    bomb.style.left = '50%';
+                    bomb.style.bottom = '30%';
+                    bomb.style.setProperty('--startX', `${startX}px`);
+                    bomb.style.setProperty('--startY', `${startY}px`);
+                    bomb.style.setProperty('--endX', `${endX}px`);
+                    bomb.style.setProperty('--endY', `${endY}px`);
+                    bomb.style.animationDuration = `${Math.random() * 2 + 1}s`;
+                    
+                    sceneContainer.appendChild(bomb);
+                    
+                    // Remove after animation
+                    setTimeout(() => {
+                        bomb.remove();
+                    }, 3000);
+                }
+            }
+            
+            function createSmokeAndAsh() {
+                // Create smoke plumes
+                for (let i = 0; i < 3; i++) {
+                    const smoke = document.createElement('div');
+                    smoke.classList.add('smoke');
+                    
+                    // Random size
+                    const size = Math.random() * 200 + 100;
+                    
+                    // Random start position (from crater)
+                    const startX = Math.random() * 100 - 50;
+                    const startY = -Math.random() * 50;
+                    
+                    // Random end position (rising up)
+                    const endX = startX + (Math.random() * 200 - 100);
+                    const endY = -Math.random() * 500 - 300;
+                    
+                    smoke.style.width = `${size}px`;
+                    smoke.style.height = `${size}px`;
+                    smoke.style.left = '50%';
+                    smoke.style.bottom = '30%';
+                    smoke.style.setProperty('--startX', `${startX}px`);
+                    smoke.style.setProperty('--startY', `${startY}px`);
+                    smoke.style.setProperty('--endX', `${endX}px`);
+                    smoke.style.setProperty('--endY', `${endY}px`);
+                    smoke.style.animationDuration = `${Math.random() * 5 + 3}s`;
+                    
+                    sceneContainer.appendChild(smoke);
+                    
+                    // Remove after animation
+                    setTimeout(() => {
+                        smoke.remove();
+                    }, 8000);
+                }
+                
+                // Create falling ash
+                for (let i = 0; i < 5; i++) {
+                    const ash = document.createElement('div');
+                    ash.classList.add('ash');
+                    
+                    // Random size
+                    const size = Math.random() * 10 + 5;
+                    
+                    // Random start position (top of screen)
+                    const startX = Math.random() * window.innerWidth;
+                    const startY = -Math.random() * 100;
+                    
+                    // Random end position (falling down)
+                    const endX = startX + (Math.random() * 100 - 50);
+                    const endY = Math.random() * window.innerHeight + window.innerHeight;
+                    
+                    ash.style.width = `${size}px`;
+                    ash.style.height = `${size}px`;
+                    ash.style.left = `${startX}px`;
+                    ash.style.top = `${startY}px`;
+                    ash.style.setProperty('--startX', '0px');
+                    ash.style.setProperty('--startY', '0px');
+                    ash.style.setProperty('--endX', `${endX - startX}px`);
+                    ash.style.setProperty('--endY', `${endY}px`);
+                    ash.style.animationDuration = `${Math.random() * 5 + 3}s`;
+                    
+                    sceneContainer.appendChild(ash);
+                    
+                    // Remove after animation
+                    setTimeout(() => {
+                        ash.remove();
+                    }, 8000);
+                }
+            }
+            
+            // Replay button
+            document.getElementById('replay-btn').addEventListener('click', function() {
+                sceneContainer.style.display = 'none';
+                options.style.display = 'none';
+                
+                // Remove all effects
+                document.querySelectorAll('.lava-flow, .lava-particle, .lava-splash, .volcanic-bomb, .smoke, .ash').forEach(el => el.remove());
+                
+                // Show icon again
+                iconContainer.style.display = 'block';
+            });
+            
+            // Exit button
+            document.getElementById('exit-btn').addEventListener('click', function() {
+                alert('The eruption has subsided. The land will never be the same again.');
+                // In a real scenario, you might redirect or close the window
+                // window.location.href = 'https://example.com';
+            });
+        });
+    </script>
+</body>
+</html>
